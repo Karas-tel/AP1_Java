@@ -2,10 +2,12 @@
 #include <malloc.h>
 #include <stdlib.h>
 
+void print_file(FILE *file, int *flags);
+
 int main(int argc, char **argv) {
     int flagc = argc - 1;
     int *flagv = (int*)malloc(flagc * sizeof(int));
-    int *flags = (int*)calloc(sizeof(int), 3); // 3 flags: 0 - 'b', 1 - 'n', 2 - 's' 
+    int *flags = (int*)calloc(sizeof(int), 3); // 3 flags: 0 - 's', 1 - 'b', 2 - 'n' 
     for(int i = 0; i < flagc; ++i) {
         if (argv[i + 1][0] == '-') {
             flagv[i] = 1;
@@ -13,13 +15,13 @@ int main(int argc, char **argv) {
             while(argv[i + 1][j] != '\0') {
                 switch (argv[i + 1][j])
                 {
-                case 'b':
+                case 's':
                     flags[0] = 1;
                     break;
-                case 'n':
+                case 'b':
                     flags[1] = 1;
                     break;
-                case 's':
+                case 'n':
                     flags[2] = 1;
                     break;
                 default:
@@ -45,6 +47,7 @@ int main(int argc, char **argv) {
                 while (fscanf(fp, "%c", &c) == 1) {
                     fprintf(stdout, "%c", c);
                 }
+                fclose(fp);
             }
         }
     }
@@ -56,6 +59,12 @@ int main(int argc, char **argv) {
     free(flagv);
     free(flags);
     return 0;
+}
+
+void print_file(FILE *file, int *flags) {
+    if (flags[0] == 1) {
+        //cut empty strings
+    }
 }
 
 // int check_flag(char *flag){
