@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    printf("argc: %d\n", argc);
+    printf("\nargc: %d\n", argc);
     for(int i = 1; i < argc; ++i) {
         printf("argv(%d): %s %s a flag\n", i, argv[i], flagv[i - 1] == 1 ? "is" : "isn't");
     }
