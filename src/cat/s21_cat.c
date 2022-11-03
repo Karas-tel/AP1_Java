@@ -7,7 +7,7 @@ void print_file(FILE *file, int *flags);
 int main(int argc, char **argv) {
     int flagc = argc - 1;
     int *flagv = (int*)malloc(flagc * sizeof(int));
-    int *flags = (int*)calloc(sizeof(int), 6); // 3 flags: 0 - 's', 1 - 'b', 2 - 'n', 3 - 'E', 4 - 'T', 5 - 'v' 
+    int *flags = (int*)calloc(sizeof(int), 6); // 3 flags: 0 - 's', 1 - 'b', 2 - 'n', 3 - 'E', 4 - 'T', 5 - 'v', 6 - 'e', 7 't'
     for(int i = 0; i < flagc; ++i) {
         if (argv[i + 1][0] == '-') {
             flagv[i] = 1;
@@ -32,6 +32,14 @@ int main(int argc, char **argv) {
                     break;
                 case 'v':
                     flags[5] = 1;
+                    break;
+                case 'e':
+                    flags[5] = 1;
+                    flags[3] = 1;
+                    break;
+                case 't':
+                    flags[5] = 1;
+                    flags[4] = 1;
                     break;
                 default:
                     flagv[i] = -1;
@@ -62,11 +70,12 @@ int main(int argc, char **argv) {
             }
         }
     }
-
+/*
     printf("\nargc: %d\n", argc);
     for(int i = 1; i < argc; ++i) {
         printf("argv(%d): %s %s a flag\n", i, argv[i], flagv[i - 1] == 1 ? "is" : "isn't");
     }
+*/
     free(flagv);
     free(flags);
     return 0;
@@ -88,41 +97,51 @@ void print_file(FILE *file, int *flags) {
     
     if (flags[1] == 1) {
             if (0 < iter && text[0] != '\n')
-                fprintf(stdout, "%6d  ", number++);
+                fprintf(stdout, "%6d\t", number++);
         } else if (flags[2] == 1) {
             if (0 < iter)
-                fprintf(stdout, "%6d  ", number++);
+                fprintf(stdout, "%6d\t", number++);
         }
 
     for (int i = 0; i < iter; ++i) {
-        
+        c = text[i];
+        int flag_work_5 = 0;
         if (flags[0] == 1) { // flag -s
-            if (i < iter - 2 && text[i] == '\n' && text[i] == text[i+1] && text[i+1] == text[i+2] ) { continue; }
+            if (i < iter - 2 && c == '\n' && c == text[i+1] && text[i+1] == text[i+2] ) { continue; }
         }
 
         if (flags[5] == 1) { // -v
-            if (text[i] == '\n')
-                fprintf(stdout, "$");
+            if (((int)c >= 0 && (int)c < 32 && c != '\n' && (int)c != 9) || (int)c == 127) {
+                if ((int)c != 127) {
+                    c = (char)((int)c + 64);
+                } else c = '?';
+                flag_work_5 = 1;
+            }
         }
 
         if (flags[3] == 1) { // print $ flag -E
-            if (text[i] == '\n')
+            if (c == '\n') {
                 fprintf(stdout, "$");
+                flag_work_5 = 0;
+            }
         }
-        if (flags[4] != 1) { // tab -> ^| flag -T
-            fprintf(stdout, "%c", text[i]);
-        } else {
-            if (text[i] == (char)9) fprintf(stdout, "^|");
-            else fprintf(stdout, "%c", text[i]);
+        if (flags[4] == 1) { // tab -> ^| flag -T
+            if (c == (char)9) {
+                c = 'I'; 
+                flag_work_5 = 1;
+            }
         }
         
-        
+        if (flag_work_5 == 1) {
+            fprintf(stdout, "^");
+        }
+        fprintf(stdout, "%c", c);
         if (flags[1] == 1) { // print number not empty strings flag -b
-            if (i < iter - 1 && text[i] == '\n' && text[i] != text[i+1])
-                fprintf(stdout, "%6d  ", number++);
+            if (i < iter - 1 && c == '\n' && c != text[i+1])
+                fprintf(stdout, "%6d\t", number++);
         } else if (flags[2] == 1) { // print number empty strings flag -n
-            if (text[i] == '\n')
-                fprintf(stdout, "%6d  ", number++);
+            if (c == '\n')
+                fprintf(stdout, "%6d\t", number++);
         }
     }
     free(text);

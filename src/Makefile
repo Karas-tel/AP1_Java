@@ -4,7 +4,7 @@ all:
 	#hello there
 
 s21_cat: cat/s21_cat.c
-	gcc $(CFLAGS) cat/s21_cat.c -o cat/s21_cat.out
+	gcc $(CFLAGS) cat/s21_cat.c -o cat/s21_cat
 	make clean
 
 clean:
