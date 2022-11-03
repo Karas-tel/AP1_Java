@@ -3,13 +3,12 @@ CFLAGS = -Wall -Wextra -Werror
 all:
 	#hello there
 
-cat: cat/s21_cat.c
-	gcc $(CFLAGS) cat/s21_cat.c -o ../build/s21_cat.out
+s21_cat: cat/s21_cat.c
+	gcc $(CFLAGS) cat/s21_cat.c -o cat/s21_cat.out
 	make clean
 
 clean:
-	rm -f ../build/*.o
-	rm -f ../build/*.out
+	rm -f ../cat/*.o
 
 check:
 	#cp ../materials/linters/CPPLINT.cfg ./

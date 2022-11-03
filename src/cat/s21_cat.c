@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <malloc.h>
+//#include <malloc.h>
 #include <stdlib.h>
 
 void print_file(FILE *file, int *flags);
@@ -38,16 +38,18 @@ int main(int argc, char **argv) {
     }
 
     for(int i = 0; i < flagc; ++i) {
-        if (flagv[i] == 0) {
+        if (flagv[i] == 0) { //if flag is name_file
             FILE *fp;
-            char c;
+            //char c;
             if ((fp = fopen(argv[i + 1], "r")) == NULL) {
                 printf("s21_cat: %s: Нет такого файла или каталога", argv[i + 1]);
             } else {
-                while (fscanf(fp, "%c", &c) == 1) {
-                    fprintf(stdout, "%c", c);
-                }
+                print_file(fp, flags);
+                // while (fscanf(fp, "%c", &c) == 1) {
+                //     fprintf(stdout, "%c", c);
+                // }
                 fclose(fp);
+
             }
         }
     }
@@ -62,9 +64,42 @@ int main(int argc, char **argv) {
 }
 
 void print_file(FILE *file, int *flags) {
-    if (flags[0] == 1) {
-        //cut empty strings
+    int size_text = 256;
+    char* text = calloc(sizeof(char), size_text);
+    char c;
+    int iter = 0, number = 1;
+    while (fscanf(file, "%c", &c) == 1) {
+        text[iter] = c;
+        if (iter > size_text - 10) {
+            size_text *= 2;
+            text = (char *) realloc(text, size_text);
+        }
+        iter++;
     }
+    
+    if (flags[1] == 1) {
+            if (0 < iter && text[0] != '\n')
+                fprintf(stdout, "%6d  ", number++);
+        } else if (flags[2] == 1) {
+            if (0 < iter)
+                fprintf(stdout, "%6d  ", number++);
+        }
+
+    for (int i = 0; i < iter; ++i) {
+        
+        if (flags[0] == 1) {
+            if (i < iter - 2 && text[i] == '\n' && text[i] == text[i+1] && text[i+1] == text[i+2] ) { continue; }
+        }
+        fprintf(stdout, "%c", text[i]);
+        if (flags[1] == 1) { // print number not empty strings
+            if (i < iter - 1 && text[i] == '\n' && text[i] != text[i+1])
+                fprintf(stdout, "%6d  ", number++);
+        } else if (flags[2] == 1) { // print number empty strings
+            if (text[i] == '\n')
+                fprintf(stdout, "%6d  ", number++);
+        }
+    }
+    free(text);
 }
 
 // int check_flag(char *flag){
