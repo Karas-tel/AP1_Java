@@ -7,7 +7,7 @@ void print_file(FILE *file, int *flags);
 int main(int argc, char **argv) {
     int flagc = argc - 1;
     int *flagv = (int*)malloc(flagc * sizeof(int));
-    int *flags = (int*)calloc(sizeof(int), 5); // 3 flags: 0 - 's', 1 - 'b', 2 - 'n', 3 - 'e', 4 - 't' 
+    int *flags = (int*)calloc(sizeof(int), 6); // 3 flags: 0 - 's', 1 - 'b', 2 - 'n', 3 - 'E', 4 - 'T', 5 - 'v' 
     for(int i = 0; i < flagc; ++i) {
         if (argv[i + 1][0] == '-') {
             flagv[i] = 1;
@@ -24,11 +24,14 @@ int main(int argc, char **argv) {
                 case 'n':
                     flags[2] = 1;
                     break;
-                case 'e':
+                case 'E':
                     flags[3] = 1;
                     break;
-                case 't':
+                case 'T':
                     flags[4] = 1;
+                    break;
+                case 'v':
+                    flags[5] = 1;
                     break;
                 default:
                     flagv[i] = -1;
@@ -93,14 +96,20 @@ void print_file(FILE *file, int *flags) {
 
     for (int i = 0; i < iter; ++i) {
         
-        if (flags[0] == 1) {
+        if (flags[0] == 1) { // flag -s
             if (i < iter - 2 && text[i] == '\n' && text[i] == text[i+1] && text[i+1] == text[i+2] ) { continue; }
         }
-        if (flags[3] == 1) { // print $
+
+        if (flags[5] == 1) { // -v
             if (text[i] == '\n')
                 fprintf(stdout, "$");
         }
-        if (flags[4] != 1) { // tab -> ^|
+
+        if (flags[3] == 1) { // print $ flag -E
+            if (text[i] == '\n')
+                fprintf(stdout, "$");
+        }
+        if (flags[4] != 1) { // tab -> ^| flag -T
             fprintf(stdout, "%c", text[i]);
         } else {
             if (text[i] == (char)9) fprintf(stdout, "^|");
@@ -108,10 +117,10 @@ void print_file(FILE *file, int *flags) {
         }
         
         
-        if (flags[1] == 1) { // print number not empty strings
+        if (flags[1] == 1) { // print number not empty strings flag -b
             if (i < iter - 1 && text[i] == '\n' && text[i] != text[i+1])
                 fprintf(stdout, "%6d  ", number++);
-        } else if (flags[2] == 1) { // print number empty strings
+        } else if (flags[2] == 1) { // print number empty strings flag -n
             if (text[i] == '\n')
                 fprintf(stdout, "%6d  ", number++);
         }
