@@ -8,6 +8,7 @@ int main(int argc, char **argv) {
     int flagc = argc - 1;
     int *flagv = (int*)malloc(flagc * sizeof(int));
     int *flags = (int*)calloc(sizeof(int), 6); // 3 flags: 0 - 's', 1 - 'b', 2 - 'n', 3 - 'E', 4 - 'T', 5 - 'v', 6 - 'e', 7 't'
+    
     for(int i = 0; i < flagc; ++i) {
         if (argv[i + 1][0] == '-') {
             flagv[i] = 1;
@@ -43,7 +44,7 @@ int main(int argc, char **argv) {
                     break;
                 default:
                     flagv[i] = -1;
-                    printf("s21_cat: неверный ключ — «%c»\n", argv[i + 1][j]);
+                    fprintf(stderr, "cat: illegal option -- %c\nusage: cat [-benstuv] [file ...]\n", argv[i + 1][j]);
                     exit(0);
                     break;
                 }
@@ -59,7 +60,7 @@ int main(int argc, char **argv) {
             FILE *fp;
             //char c;
             if ((fp = fopen(argv[i + 1], "r")) == NULL) {
-                printf("s21_cat: %s: Нет такого файла или каталога", argv[i + 1]);
+                fprintf(stderr, "cat: %s: No such file or directory", argv[i + 1]);
             } else {
                 print_file(fp, flags);
                 // while (fscanf(fp, "%c", &c) == 1) {
@@ -140,7 +141,7 @@ void print_file(FILE *file, int *flags) {
             if (i < iter - 1 && c == '\n' && c != text[i+1])
                 fprintf(stdout, "%6d\t", number++);
         } else if (flags[2] == 1) { // print number empty strings flag -n
-            if (c == '\n' && i < iter)
+            if (c == '\n' && i < iter - 1)
                 fprintf(stdout, "%6d\t", number++);
         }
     }
