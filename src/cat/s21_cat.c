@@ -140,7 +140,7 @@ void print_file(FILE *file, int *flags) {
             if (i < iter - 1 && c == '\n' && c != text[i+1])
                 fprintf(stdout, "%6d\t", number++);
         } else if (flags[2] == 1) { // print number empty strings flag -n
-            if (c == '\n')
+            if (c == '\n' && i < iter)
                 fprintf(stdout, "%6d\t", number++);
         }
     }
