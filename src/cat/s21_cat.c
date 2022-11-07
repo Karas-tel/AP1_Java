@@ -1,92 +1,91 @@
 #include <stdio.h>
-//#include <malloc.h>
+#include <unistd.h>
+#include <getopt.h>
 #include <stdlib.h>
 
-void print_file(FILE *file, int *flags);
+void print_file(FILE *file, int number, int number_nonblank, int squeeze_blank,
+                int show_ends, int show_nonprinting, int show_tabs);
 
-int main(int argc, char **argv) {
-    int flagc = argc - 1;
-    int *flagv = (int*)malloc(flagc * sizeof(int));
-    int *flags = (int*)calloc(sizeof(int), 6); // 3 flags: 0 - 's', 1 - 'b', 2 - 'n', 3 - 'E', 4 - 'T', 5 - 'v', 6 - 'e', 7 't'
+int main(int argc, char *argv[]) {
+	int flag = 0;
+    int number = 0;
+    int number_nonblank = 0;
+    int squeeze_blank = 0;
+    int show_ends = 0;
+    int show_nonprinting = 0;
+    int show_tabs = 0;
     
-    for(int i = 0; i < flagc; ++i) {
-        if (argv[i + 1][0] == '-') {
-            flagv[i] = 1;
-            int j = 1;
-            while(argv[i + 1][j] != '\0') {
-                switch (argv[i + 1][j])
-                {
-                case 's':
-                    flags[0] = 1;
-                    break;
-                case 'b':
-                    flags[1] = 1;
-                    break;
-                case 'n':
-                    flags[2] = 1;
-                    break;
-                case 'E':
-                    flags[3] = 1;
-                    break;
-                case 'T':
-                    flags[4] = 1;
-                    break;
-                case 'v':
-                    flags[5] = 1;
-                    break;
-                case 'e':
-                    flags[5] = 1;
-                    flags[3] = 1;
-                    break;
-                case 't':
-                    flags[5] = 1;
-                    flags[4] = 1;
-                    break;
-                default:
-                    flagv[i] = -1;
-                    fprintf(stderr, "cat: illegal option -- %c\nusage: cat [-benstuv] [file ...]\n", argv[i + 1][j]);
-                    exit(0);
-                    break;
-                }
-                j++;
-            }
-        } else {
-            flagv[i] = 0;
-        }
+	const char* short_options = "beEnstTv";
+
+	const struct option long_options[] = {
+		{ "number-nonblank", no_argument, 0, 'b' },
+		{ "number", no_argument, 0, 'n'},
+		{ "squeeze-blank", no_argument, 0, 's'},
+		{ NULL, 0, NULL, 0}
+	};
+
+	opterr = 0;
+
+	while ((flag = getopt_long(argc, argv, short_options, long_options, NULL)) != -1){
+		switch (flag) {
+		case 'b': 
+            number = 1;
+            number_nonblank = 1;
+            break;
+		case 'e':
+            show_ends = 1;
+            show_nonprinting = 1;
+            break;
+		case 'E':
+            show_ends = 1;
+            break;
+		case 'n':
+            number = 1;
+            break;
+		case 's': 
+            squeeze_blank = 1;
+            break;
+        case 't':
+            show_tabs = 1;
+            show_nonprinting = 1;
+            break;
+        case 'T':
+            show_tabs = 1;
+            break;
+        case 'v':
+            show_nonprinting = 1; 
+            break;
+        default : fprintf(stderr, "s21_cat: illegal option\nusage: ./s21_cat [-beEnstTv] [file] ...\n"); break; 
+		}
     }
 
-    for(int i = 0; i < flagc; ++i) {
-        if (flagv[i] == 0) { //if flag is name_file
-            FILE *fp;
-            //char c;
-            if ((fp = fopen(argv[i + 1], "r")) == NULL) {
-                fprintf(stderr, "cat: %s: No such file or directory", argv[i + 1]);
+    if (optind >= argc) {
+        fprintf(stderr, "s21_cat: illegal option\nusage: ./s21_cat [-beEnstTv] [file] ...\n");
+    }
+
+    if (optind < argc) {
+        do {
+            char *file_name = argv[optind];
+            FILE *file;
+            if ((file = fopen(file_name, "r")) == NULL) {
+                fprintf(stderr, "s21_cat: %s: No such file or directory", file_name);
             } else {
-                print_file(fp, flags);
-                // while (fscanf(fp, "%c", &c) == 1) {
-                //     fprintf(stdout, "%c", c);
-                // }
-                fclose(fp);
-
+                print_file(file, number, number_nonblank, squeeze_blank,
+                show_ends, show_nonprinting, show_tabs);
+                fclose(file);
             }
-        }
+        } while ( ++optind < argc);
     }
-/*
-    printf("\nargc: %d\n", argc);
-    for(int i = 1; i < argc; ++i) {
-        printf("argv(%d): %s %s a flag\n", i, argv[i], flagv[i - 1] == 1 ? "is" : "isn't");
-    }
-*/
-    free(flagv);
-    free(flags);
+
     return 0;
 }
 
-void print_file(FILE *file, int *flags) {
+void print_file(FILE *file, int number, int number_nonblank, int squeeze_blank,
+                int show_ends, int show_nonprinting, int show_tabs) {
     int size_text = 256;
     char* text = calloc(sizeof(char), size_text);
     char c;
-    int iter = 0, number = 1;
+    int iter = 0, number_string = 1;
     while (fscanf(file, "%c", &c) == 1) {
         text[iter] = c;
         if (iter > size_text - 10) {
@@ -96,22 +95,23 @@ void print_file(FILE *file, int *flags) {
         iter++;
     }
     
-    if (flags[1] == 1) {
-            if (0 < iter && text[0] != '\n')
-                fprintf(stdout, "%6d\t", number++);
-        } else if (flags[2] == 1) {
-            if (0 < iter)
-                fprintf(stdout, "%6d\t", number++);
-        }
+    if (number_nonblank == 1) {
+        if (0 < iter && text[0] != '\n')
+            fprintf(stdout, "%6d\t", number_string++);
+    } else if (number == 1) {
+        if (0 < iter)
+            fprintf(stdout, "%6d\t", number_string++);
+    }
 
     for (int i = 0; i < iter; ++i) {
         c = text[i];
         int flag_work_5 = 0;
-        if (flags[0] == 1) { // flag -s
+
+        if (squeeze_blank == 1) {
             if (i < iter - 2 && c == '\n' && c == text[i+1] && text[i+1] == text[i+2] ) { continue; }
         }
 
-        if (flags[5] == 1) { // -v
+        if (show_nonprinting == 1) {
             if (((int)c >= 0 && (int)c < 32 && c != '\n' && (int)c != 9) || (int)c == 127) {
                 if ((int)c != 127) {
                     c = (char)((int)c + 64);
@@ -120,13 +120,14 @@ void print_file(FILE *file, int *flags) {
             }
         }
 
-        if (flags[3] == 1) { // print $ flag -E
+        if (show_ends == 1) {
             if (c == '\n') {
                 fprintf(stdout, "$");
                 flag_work_5 = 0;
             }
         }
-        if (flags[4] == 1) { // tab -> ^| flag -T
+
+        if (show_tabs == 1) {
             if (c == (char)9) {
                 c = 'I'; 
                 flag_work_5 = 1;
@@ -137,28 +138,14 @@ void print_file(FILE *file, int *flags) {
             fprintf(stdout, "^");
         }
         fprintf(stdout, "%c", c);
-        if (flags[1] == 1) { // print number not empty strings flag -b
+
+        if (number_nonblank == 1) {
             if (i < iter - 1 && c == '\n' && c != text[i+1])
-                fprintf(stdout, "%6d\t", number++);
-        } else if (flags[2] == 1) { // print number empty strings flag -n
+                fprintf(stdout, "%6d\t", number_string++);
+        } else if (number == 1) {
             if (c == '\n' && i < iter - 1)
-                fprintf(stdout, "%6d\t", number++);
+                fprintf(stdout, "%6d\t", number_string++);
         }
     }
     free(text);
 }
-
-// int check_flag(char *flag){
-//     while(*flag != '\0') {
-//         switch (*flag)
-//         {
-//         case '':
-//             /* code */
-//             break;
-        
-//         default:
-//             break;
-//         }
-//     }
-//     return 0;
-// }
