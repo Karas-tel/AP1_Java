@@ -26,6 +26,8 @@ int main(int argc, char *argv[]) {
   int flag = 0;
   regex_t regex;
   struct grep_flags f;
+  f.count = 0;
+  f.invert_match = 0;
   char reg[500];
   reg[0] = '\0';
   const char *short_options = "e:ivclnhsof:";
@@ -107,16 +109,33 @@ void find_in_file(FILE* file, struct grep_flags flags, regex_t regex) {
     char *text;
     regmatch_t match;
     int correct = 0;
+    int rez_regexec = 0;
+    int counter_all = 0;
+    int counter_match = 0;
+    int counter_no_match = 0;
     do {
+        counter_all++;
         correct = get_text(file, &text, &size_text);
         //printf("get_text: %s", text);
-        if (regexec(&regex, text, 1, &match, REG_NOTEOL) != REG_NOMATCH) {
+        rez_regexec = regexec(&regex, text, 1, &match, REG_NOTEOL);
+        if (rez_regexec != REG_NOMATCH && flags.invert_match == 0) {
             //print_string(text, size_text, match);
-            printf("%s", text);
+            counter_match++;
+            if (flags.count == 0) printf("%s\n", text);
             //printf("\n%d %d\n", match.rm_so, match.rm_eo);
+        } else if (rez_regexec == REG_NOMATCH && flags.invert_match == 1) {
+          counter_no_match++;
+          if (flags.count == 0) printf("%s\n", text);
         }
     } while (correct == 1);
     //printf("no match\n");
+    if (flags.count == 1) {
+      if (flags.invert_match == 0) {
+        printf("%d\n", counter_match);
+      } else {
+        printf("%d\n", counter_no_match);
+      }
+    } 
     free(text);
 }
 
@@ -154,9 +173,9 @@ int get_text(FILE* file, char **text, int *size_text) {
         //iter++;
     }
 
-    if (correct == 1) {
-        (*text)[iter++] = '\n';
-        *size_text = iter;
-    }
+    // if (correct == 1) {
+    //     (*text)[iter++] = '\n';
+    //     *size_text = iter;
+    // }
     return correct;
 }
