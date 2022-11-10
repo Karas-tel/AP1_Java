@@ -7,6 +7,18 @@ s21_cat: cat/s21_cat.c
 	gcc $(CFLAGS) cat/s21_cat.c -o cat/s21_cat
 	make clean
 
+s21_cat_test: cat/s21_cat_test.c
+	gcc $(CFLAGS) cat/s21_cat_test.c -o cat/s21_cat_test
+	make clean
+
+s21_grep: grep/s21_grep.c
+	gcc $(CFLAGS) grep/s21_grep.c -o grep/s21_grep
+	make clean
+
+s21_grep_test: grep/s21_grep_test.c
+	gcc $(CFLAGS) grep/s21_grep_test.c -o grep/s21_grep_test
+	make clean
+
 clean:
 	rm -f ../cat/*.o
 

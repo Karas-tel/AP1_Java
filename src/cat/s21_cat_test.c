@@ -5,13 +5,14 @@
 int compare();
 
 int main() {
-    int n = 12;
+    int n = 7;
     int counter = 0;
     int sucses = 0, fail = 0;
-    char flags[12][17] = { {"-b"}, {"-e"}, {"-E"}, {"-n"}, {"-s"}, {"-t"},
-                           {"-T"}, {"-v"}, {"--number-nonblank"}, {"--number"},
-                           {"squeeze-blank"}, {""} };
-    char string[300];
+    char flags[7][2]= { {"b"}, {"e"}, {"n"}, {"s"}, {"t"},
+                           {"v"}, {""} };
+    char string_f[20];
+    char string_cat[300];
+    char string_s21_cat[300];
     for (int i1 = 0; i1 < n; ++i1) {
         for (int i2 = 0; i2 < n; ++i2) {
             for (int i3 = 0; i3 < n; ++i3) {
@@ -19,69 +20,49 @@ int main() {
                     for (int i5 = 0; i5 < n; ++i5) {
                         for (int i6 = 0; i6 < n; ++i6) {
                             for (int i7 = 0; i7 < n; ++i7) {
-                                for (int i8 = 0; i8 < n; ++i8) {
-                                    for (int i9 = 0; i9 < n; ++i9) {
-                                        for (int i10 = 0; i10 < n; ++i10) {
-                                            for (int i11 = 0; i11 < n; ++i11) {
-                                                for (int i12 = 0; i12 < n; ++i12) {
-                                                    string[0] = '\0';
-                                                    strcat(string, flags[i1]);
-                                                    strcat(string, flags[i2]);
-                                                    strcat(string, flags[i3]);
-                                                    strcat(string, flags[i4]);
-                                                    strcat(string, flags[i5]);
-                                                    strcat(string, flags[i6]);
-                                                    strcat(string, flags[i7]);
-                                                    strcat(string, flags[i8]);
-                                                    strcat(string, flags[i9]);
-                                                    strcat(string, flags[i10]);
-                                                    strcat(string, flags[i11]);
-                                                    strcat(string, flags[i12]);
-                                                    counter++;
-                                                    if (counter % 1000 == 0) printf("\tcounter:%18d\tsucses:%18d\tfail:%18d\n", counter, sucses, fail);
-                                                    system("cat -n test_case_cat.txt > cat_out_log.txt");
-                                                    system("cat/s21_cat -n test_case_cat.txt > s21_cat_out_log.txt");
-                                                    if (compare() > 0) {sucses++;}
-                                                    else if (compare() < 0) {fail++;}
-                                                } 
-                                            }
-                                        }
-                                    } 
-                                } 
-                            } 
+                                string_f[0] = '\0';
+                                string_cat[0] = '\0';
+                                string_s21_cat[0] = '\0';
+                                counter++;
+                                sprintf(string_f, "-%s%s%s%s%s%s%s", flags[i1], flags[i2],
+                                        flags[i3], flags[i4], flags[i5], flags[i6], flags[i7]);
+                                if (string_f[1] == '\0') string_f[0] = '\0';
+                                sprintf(string_cat, "cat %s test_case_cat.txt > cat_out_log.txt", string_f);
+                                sprintf(string_s21_cat, "./s21_cat %s test_case_cat.txt > s21_cat_out_log.txt", string_f);
+                                system(string_cat);
+                                system(string_s21_cat);
+                                int rez = compare();
+                                if (rez > 0) {sucses++;}
+                                else if (rez < 0) {fail++;}
+                                if (counter % 1000 == 0) printf("\tcounter:%10d\tsucses:%10d\tfail:%10d\n", counter, sucses, fail);
+                            }                                          
                         } 
                     } 
                 }
             }
         } 
     }
-
+    printf("\tcounter:%10d\tsucses:%10d\tfail:%10d\n", counter, sucses, fail);
     return 0;
 }
 
 int compare() {
     int ch1 = 0, ch2 = 0;
-   int rez = 0;
+    int rez = 0;
+
+    FILE* f1 = fopen("cat_out_log.txt", "r"); //assert(f1);
+    FILE* f2 = fopen("s21_cat_out_log.txt", "r"); //assert(f2);
  
-   FILE* f1 = fopen("cat_out_log.txt", "r"); //assert(f1);
-   FILE* f2 = fopen("s21_cat_out_log.txt", "r"); //assert(f2);
+    while (!feof(f1) && !feof(f2) && (ch1 == ch2)) {
+        ch1 = fgetc(f1);
+        ch2 = fgetc(f2);
+    }
+
+    if (ch1 == ch2) rez = 1;
+    else rez = -1;
  
-   while (!feof(f1) && !feof(f2) && (ch1 == ch2))
-   {
-      ch1 = fgetc(f1);
-      ch2 = fgetc(f2);
-   }
- 
-   if (ch1 == ch2)
-   {
-      rez = 1;
-   }
-   else
-   {
-      rez = -1;
-   }
- 
-   fclose(f2);
-   fclose(f1);
-   return rez;
+    fclose(f2);
+    fclose(f1);
+    system("rm cat_out_log.txt s21_cat_out_log.txt");
+    return rez;
 }
