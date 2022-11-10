@@ -116,7 +116,7 @@ void find_in_file(FILE* file, struct grep_flags flags, regex_t regex, char *file
     int counter_all = 0;
     int counter_match = 0;
     int counter_no_match = 0;
-    
+    //недоделаны обработки флага -l
     do {
         counter_all++;
         correct = get_text(file, &text, &size_text);
@@ -149,11 +149,33 @@ void find_in_file(FILE* file, struct grep_flags flags, regex_t regex, char *file
             }
         }
     } while (correct == 1);
-
+    //недоделаны обработки флага -l
+//недоделаны обработки флага -l
     if (flags.count == 1) { //вывод только строк
-      if (flags.invert_match == 0) printf("%d\n", counter_match);
+      if ((flags.many_files > 1 && 
+          (flags.pattern == 1 || flags.pattern_from_file == 1)) ||
+          flags.many_files > 2) {
+        
+        //printf("%s:%d\n", file_name, counter_match);
+        if (flags.invert_match == 0) {
+        if (flags.files_with_matches == 0) {
+          printf("%s:%d\n", file_name, counter_match);
+        } else {
+          printf("%s:%d\n", file_name, counter_match);
+        }
+        }
+        else printf("%d\n", counter_no_match);
+      }
+      if (flags.invert_match == 0) {
+        if (flags.files_with_matches == 0) {
+          printf("%d\n", counter_match);
+        } else {
+
+        }
+      }
       else printf("%d\n", counter_no_match);
     } 
+// -l
     free(text);
 }
 
