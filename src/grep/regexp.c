@@ -22,7 +22,7 @@ int get_text(FILE* file, char **text, int *size_text);
 int main() {
     regex_t regex;
     struct grep_flags flags;
-    char* reg = "ag";
+    char* reg = "return 0;";
     if (regcomp(&regex, reg, REG_EXTENDED) == 0) {
         //printf("success\n");
         char *file_name = "test_case_grep.txt";
