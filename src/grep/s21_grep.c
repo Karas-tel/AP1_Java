@@ -16,22 +16,24 @@ struct grep_flags {
     int no_messages_error; // -s | --no-messages-error
     int only_matching; // -o | --only-matching
     int pattern_from_file; // -f [file] | <pattern-from-file>
+    int many_files;
 };
 
-void find_in_file(FILE* file, struct grep_flags flags, regex_t regex);
+void find_in_file(FILE* file, struct grep_flags flags, regex_t regex, char *file_name);
 int print_color_string(char *text, int size_text, regmatch_t match);
 int get_text(FILE* file, char **text, int *size_text);
+void zeroing_flags(struct grep_flags *flags);
 
 int main(int argc, char *argv[]) {
   int flag = 0;
   regex_t regex;
   struct grep_flags f;
-  f.count = 0;
-  f.invert_match = 0;
+  zeroing_flags(&f);
+
   char reg[500];
   reg[0] = '\0';
   const char *short_options = "e:ivclnhsof:";
-
+  int cflags = REG_EXTENDED;
   opterr = 0;
 
   while ((flag = getopt(argc, argv, short_options)) != -1) {
@@ -47,6 +49,7 @@ int main(int argc, char *argv[]) {
         break;
       case 'i':
         f.ignore_case = 1;
+        cflags += REG_ICASE;
         break;
       case 'v':
         f.invert_match = 1;
@@ -85,7 +88,7 @@ int main(int argc, char *argv[]) {
                 "s21_grep: illegal option\nusage: ./s21_grep [-e:ivclnhsof:] [file] "
                 "...\n");
   }
-
+  f.many_files = argc - optind;
   if (optind < argc) {
     do {
       char *file_name = argv[optind];
@@ -93,8 +96,8 @@ int main(int argc, char *argv[]) {
       if ((file = fopen(file_name, "r")) == NULL) {
         fprintf(stderr, "s21_grep: %s: No such file or directory", file_name);
       } else {
-        if (regcomp(&regex, reg, REG_EXTENDED) == 0) {
-          find_in_file(file, f, regex);
+        if (regcomp(&regex, reg, cflags) == 0) {
+          find_in_file(file, f, regex, file_name);
         }
         fclose(file);
       }
@@ -104,7 +107,7 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-void find_in_file(FILE* file, struct grep_flags flags, regex_t regex) {
+void find_in_file(FILE* file, struct grep_flags flags, regex_t regex, char *file_name) {
     int size_text;
     char *text;
     regmatch_t match;
@@ -113,28 +116,43 @@ void find_in_file(FILE* file, struct grep_flags flags, regex_t regex) {
     int counter_all = 0;
     int counter_match = 0;
     int counter_no_match = 0;
+    
     do {
         counter_all++;
         correct = get_text(file, &text, &size_text);
-        //printf("get_text: %s", text);
         rez_regexec = regexec(&regex, text, 1, &match, REG_NOTEOL);
-        if (rez_regexec != REG_NOMATCH && flags.invert_match == 0) {
-            //print_string(text, size_text, match);
+        if (rez_regexec != REG_NOMATCH && flags.invert_match == 0) { //если не инвентировано
             counter_match++;
-            if (flags.count == 0) printf("%s\n", text);
-            //printf("\n%d %d\n", match.rm_so, match.rm_eo);
-        } else if (rez_regexec == REG_NOMATCH && flags.invert_match == 1) {
-          counter_no_match++;
-          if (flags.count == 0) printf("%s\n", text);
+            if (flags.count == 0) { //если нет вывода только строк
+              if (flags.line_number == 1) { //нумерация строк
+                if ((flags.many_files > 1 && 
+                (flags.pattern == 1 || flags.pattern_from_file == 1)) ||
+                flags.many_files > 2) {
+                  printf("%s:%d:%s\n", file_name, counter_all, text);
+                } else {
+                  printf("%d:%s\n", counter_all, text);
+                }
+              }
+              else {
+                printf("%s\n", text);
+              }
+            }
+        } else if (rez_regexec == REG_NOMATCH && flags.invert_match == 1) { //если инвентировано
+            counter_no_match++;
+            if (flags.count == 0) { //если нет вывода только строк
+              if (flags.line_number == 1) { //нумерация строк
+                printf("%d:%s\n", counter_all, text);
+              }
+              else {
+                printf("%s\n", text);
+              }
+            }
         }
     } while (correct == 1);
-    //printf("no match\n");
-    if (flags.count == 1) {
-      if (flags.invert_match == 0) {
-        printf("%d\n", counter_match);
-      } else {
-        printf("%d\n", counter_no_match);
-      }
+
+    if (flags.count == 1) { //вывод только строк
+      if (flags.invert_match == 0) printf("%d\n", counter_match);
+      else printf("%d\n", counter_no_match);
     } 
     free(text);
 }
@@ -178,4 +196,18 @@ int get_text(FILE* file, char **text, int *size_text) {
     //     *size_text = iter;
     // }
     return correct;
+}
+
+void zeroing_flags(struct grep_flags *flags) {
+    (*flags).pattern = 0; // [-e] <pattern>
+    (*flags).ignore_case = 0; // -i | --ignore-case
+    (*flags).invert_match = 0; // -v | --invert-match 
+    (*flags).count = 0; // -c | --count
+    (*flags).files_with_matches = 0; // -l | --files-with-matches
+    (*flags).line_number = 0; // -n | --line-number
+    (*flags).no_filename = 0; // -h | --no-filename
+    (*flags).no_messages_error = 0; // -s | --no-messages-error
+    (*flags).only_matching = 0; // -o | --only-matching
+    (*flags).pattern_from_file = 0; // -f [file] | <pattern-from-file>
+    (*flags).many_files = 0;
 }
