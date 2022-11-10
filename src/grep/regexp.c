@@ -16,7 +16,7 @@ struct grep_flags {
 };
 
 void find_in_file(FILE* file, struct grep_flags flags, regex_t regex);
-int print_string(char *text, int size_text, regmatch_t match, int *iter);
+int print_color_string(char *text, int size_text, regmatch_t match);
 int get_text(FILE* file, char **text, int *size_text);
 
 int main() {
@@ -24,7 +24,7 @@ int main() {
     struct grep_flags flags;
     char* reg = "ag";
     if (regcomp(&regex, reg, REG_EXTENDED) == 0) {
-        printf("success\n");
+        //printf("success\n");
         char *file_name = "test_case_grep.txt";
         FILE *file;
         if ((file = fopen(file_name, "r")) == NULL) {
@@ -39,34 +39,45 @@ int main() {
         return 0; 
     }
     
-    printf("\n");
+    //printf("\n");
     regfree(&regex);
     return 0;
 }
 
 void find_in_file(FILE* file, struct grep_flags flags, regex_t regex) {
     int size_text;
-    int iter = 0;
     char *text;
     regmatch_t match;
-    get_text(file, &text, &size_text);
-    if (regexec(&regex, text, 1, &match, REG_NOTEOL) == REG_NOMATCH) printf("no match\n");
-    else print_string(text, size_text, match, &iter);
-    
+    int correct = 0;
+    do {
+        correct = get_text(file, &text, &size_text);
+        //printf("get_text: %s", text);
+        if (regexec(&regex, text, 1, &match, REG_NOTEOL) != REG_NOMATCH) {
+            //print_string(text, size_text, match);
+            printf("%s", text);
+            //printf("\n%d %d\n", match.rm_so, match.rm_eo);
+        }
+    } while (correct == 1);
+    //printf("no match\n");
+    free(text);
 }
 
-int print_string(char *text, int size_text, regmatch_t match, int *iter) {
-    for (int i = *iter; i < match.rm_so; ++i ) {
+int print_color_string(char *text, int size_text, regmatch_t match) {
+    int i;
+    for (i = 0; i < match.rm_so; ++i ) {
         printf("%c", text[i]);
     }
     printf("\033[0;31m");
-    for (int i = match.rm_so; i < match.rm_eo; ++i ) {
+    for (i = match.rm_so; i < match.rm_eo; ++i ) {
         printf("%c", text[i]);
     }
     printf("\033[0m");
-    for (int i = match.rm_eo; text[i] != '\n' && i < size_text; ++i, *iter = i ) {
+    for (i = match.rm_eo; text[i] != '\n' && i < size_text; ++i ) {
         printf("%c", text[i]);
     }
+    //*iter = match.rm_eo;
+    //if (i != size_text) printf("%c", text[i]);
+    printf("\n");
     return 0;
 }
 
@@ -75,14 +86,19 @@ int get_text(FILE* file, char **text, int *size_text) {
     *text = calloc(sizeof(char), *size_text);
     char ch;
     int iter = 0;
-    while (fscanf(file, "%c", &ch) == 1) {
-        (*text)[iter] = ch;
+    int correct = 0;
+    while ((correct = fscanf(file, "%c", &ch)) == 1 && ch != '\n') {
+        (*text)[iter++] = ch;
         if (iter > *size_text - 10) {
             *size_text *= 1.7;
             *text = (char *)realloc(*text, *size_text);
         }
-        iter++;
+        //iter++;
     }
-    *size_text = iter;
-    return 0;
+
+    if (correct == 1) {
+        (*text)[iter++] = '\n';
+        *size_text = iter;
+    }
+    return correct;
 }
