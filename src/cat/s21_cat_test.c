@@ -3,11 +3,11 @@
 #include <stdlib.h>
 
 int compare();
-
+//success and failure
 int main() {
     int n = 7;
     int counter = 0;
-    int sucses = 0, fail = 0;
+    int success = 0, failure = 0;
     char flags[7][2]= { {"b"}, {"e"}, {"n"}, {"s"}, {"t"},
                            {"v"}, {""} };
     char string_f[20];
@@ -32,9 +32,9 @@ int main() {
                                 system(string_cat);
                                 system(string_s21_cat);
                                 int rez = compare();
-                                if (rez > 0) {sucses++;}
-                                else if (rez < 0) {fail++;}
-                                if (counter % 1000 == 0) printf("\tcounter:%10d\tsucses:%10d\tfail:%10d\n", counter, sucses, fail);
+                                if (rez > 0) {success++;}
+                                else if (rez < 0) {failure++;}
+                                if (counter % 1000 == 0) printf("\tcounter:%10d\tsuccess:%10d\tfailure:%10d\n", counter, success, failure);
                             }                                          
                         } 
                     } 
@@ -42,7 +42,7 @@ int main() {
             }
         } 
     }
-    printf("\tcounter:%10d\tsucses:%10d\tfail:%10d\n", counter, sucses, fail);
+    printf("\tcounter:%10d\tsuccess:%10d\tfailure:%10d\n", counter, success, failure);
     return 0;
 }
 
