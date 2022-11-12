@@ -5,7 +5,8 @@ typedef enum {
     NO_FILE, 
     NO_OPTION, 
     ILLEGAL_OPTION, 
-    WRONG_PATTERN
+    WRONG_PATTERN,
+    WRONG_MEMORY
 }errors;
 
 void print_error(errors error, char* content, int no_message);

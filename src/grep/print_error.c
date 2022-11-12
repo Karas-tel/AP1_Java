@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 void print_error(errors error, char* content, int no_message) {
-    if (no_message != 0) {
+    if (no_message == 0) {
         switch (error)
         {
         case NO_FILE:
@@ -24,7 +24,10 @@ void print_error(errors error, char* content, int no_message) {
         case WRONG_PATTERN:
             fprintf(stderr, "s21_grep: %s: Wrong regular pattern",
                 content != NULL ? content : "");
-            break;    
+            break; 
+        case WRONG_MEMORY:
+            fprintf(stderr, "s21_grep: Wrong memory\n");
+            break;   
         default:
             break;
         }

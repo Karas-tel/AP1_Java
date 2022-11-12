@@ -1,25 +1,56 @@
 #include "grep_flags.h"
 #include "print_error.h"
+#include "read_file.h"
 
 #include <getopt.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+
+int add_pattern(char **pattern, int *size_pattern, char *optarg) {
+    int size_opt = strlen(optarg);
+    int size_pat = strlen(*pattern);
+    int flag_correct_work = 0;
+    if ((size_opt + size_pat + 2) >= *size_pattern) {
+        *size_pattern = size_opt * 1.5 + size_pat;
+        *pattern = (char *)realloc(*pattern, *size_pattern);
+    }
+    if (*pattern == NULL) {
+        print_error(WRONG_MEMORY, NULL, 0);
+        flag_correct_work = -1;
+    }
+    if (flag_correct_work == 0) {
+        if ((*pattern)[0] != '\0') strcat(*pattern, "|");
+        strcat(*pattern, optarg);
+    }
+    return flag_correct_work;
+}
+
+int add_file_pattern(char **pattern, int *size_pattern, char *optarg, struct grep_flags flags) {
+    int flag_correct_work = 0;
+    FILE *file;
+    if ((file = fopen(optarg, "r")) == NULL) {
+        print_error(NO_FILE, optarg, flags.no_messages_error);
+        flag_correct_work = -1;
+    } else {
+        
+        fclose(file);
+    }
+    return flag_correct_work;
+}
 
 int parse_argv(int argc, char *argv[],
-               struct grep_flags *flags, char **pattern) {
-  int flag = 0;
+               struct grep_flags *flags, char **pattern, int *size_patt) {
+  int flag_char = 0;
+  int flag_correct_work = 0;
   (*pattern)[0] = '\0';
   const char *short_options = "e:ivclnhsof:";
 
-  while ((flag = getopt(argc, argv, short_options)) != -1) {
-    switch (flag) {
+  while ((flag_char = getopt(argc, argv, short_options)) != -1) {
+    switch (flag_char) {
       case 'e':
-        (*flags).pattern = 1;
-        char buf[500];
-        if ((*pattern)[0] != '\0') {
-          sprintf(buf, "|%s", optarg);
-          strcat((*pattern), buf);
-        } else
-          sprintf((*pattern), "%s", optarg);
+        flags->pattern = 1;
+        add_pattern(pattern, size_patt, optarg);
         break;
       case 'i':
         flags->ignore_case = 1;
@@ -49,16 +80,17 @@ int parse_argv(int argc, char *argv[],
         flags->pattern_from_file = 1;
         break;
       default:
-        print_error(ILLEGAL_OPTION, NULL, flags->no_messages_error);
+        print_error(ILLEGAL_OPTION, NULL, 0);
         break;
     }
   }
 
   if (optind >= argc) {
-    print_error(NO_OPTION, NULL, flags->no_messages_error);
+    print_error(NO_OPTION, NULL, 0);
+    flag_correct_work = -1;
   }
   flags->many_files = argc - optind;
-  return 0;
+  return flag_correct_work;
 }
 
 void zeroing_flags(struct grep_flags *flags) {
