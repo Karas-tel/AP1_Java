@@ -24,7 +24,7 @@ int main() {
     struct grep_flags flags;
     char* reg = "return 0;";
     if (regcomp(&regex, reg, REG_EXTENDED) == 0) {
-        //printf("success\n");
+        printf("success\n");
         char *file_name = "test_case_grep.txt";
         FILE *file;
         if ((file = fopen(file_name, "r")) == NULL) {
