@@ -20,7 +20,8 @@ int add_pattern(char **pattern, int *size_pattern, char *optarg) {
         flag_correct_work = -1;
     }
     if (flag_correct_work == 0) {
-        if ((*pattern)[0] != '\0') strcat(*pattern, "|");
+        if ((*pattern)[0] != '\0' && optarg[0] != '\0')
+         strcat(*pattern, "|");
         strcat(*pattern, optarg);
     }
     return flag_correct_work;
@@ -33,8 +34,15 @@ int add_file_pattern(char **pattern, int *size_pattern, char *optarg, struct gre
         print_error(NO_FILE, optarg, flags.no_messages_error);
         flag_correct_work = -1;
     } else {
-        
+        int size_pif;
+        char *patt_in_file;
+        int end_file = 0;
+        do {
+            end_file = get_string(file, patt_in_file, size_pif);
+            flag_correct_work = add_pattern(pattern, size_pattern, patt_in_file);
+        } while (end_file == 1);
         fclose(file);
+        free(patt_in_file);///error, wrong free if not malcal
     }
     return flag_correct_work;
 }
