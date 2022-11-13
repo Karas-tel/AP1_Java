@@ -27,7 +27,10 @@ void print_error(errors error, char* content, int no_message) {
             break; 
         case WRONG_MEMORY:
             fprintf(stderr, "s21_grep: Wrong memory\n");
-            break;   
+            break;
+        case GOOD_WORK:
+            fprintf(stderr, "s21_grep: GoodWork %s\n", content);
+            break;  
         default:
             break;
         }

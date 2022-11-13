@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
 #include "print_error.h"
 #include "grep_flags.h"
 #include "read_file.h"
@@ -35,7 +36,9 @@ int main(int argc, char *argv[]) {
         print_error(NO_FILE, file_name, flags.no_messages_error);
       } else {
         if (regcomp(&regex, pattern, cflags) == 0) {//вынести выше не для повтора
+          fprintf(stderr, "before find_in_file\n");
           find_in_file(file, flags, regex, file_name);
+          fprintf(stderr, "after find_in_file\n");
         }
         fclose(file);
       }
@@ -48,8 +51,8 @@ int main(int argc, char *argv[]) {
 
 void find_in_file(FILE *file, struct grep_flags flags, regex_t regex,
                   char *file_name) {
-  int size_text;
-  char *text;
+  int size_text = 256;
+  char *text = calloc(sizeof(char), size_text);// need check memory
   regmatch_t match;
   errors error = GOOD_WORK;
   int rez_regexec = 0;

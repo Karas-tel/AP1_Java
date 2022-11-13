@@ -37,10 +37,11 @@ int add_file_pattern(char **pattern, int *size_pattern, char *optarg) {
         if (tmp == NULL) error = WRONG_MEMORY;
         else {
             patt_in_file = tmp;
-            while (error == GOOD_WORK && error != WRONG_MEMORY) {
+            while (error == GOOD_WORK) {
                 error = get_string(file, &patt_in_file, &size_pif);
                 if (error  != WRONG_MEMORY)
-                    error = add_pattern(pattern, size_pattern, patt_in_file);//need checker
+                    if (add_pattern(pattern, size_pattern, patt_in_file) == WRONG_MEMORY)
+                      error = WRONG_MEMORY;//need checker
             }
             free(patt_in_file);
         }
@@ -62,6 +63,7 @@ int parse_argv(int argc, char *argv[],
       case 'e':
         flags->pattern = 1;
         error = add_pattern(pattern, size_patt, optarg);
+        print_error(error, optarg, 0);
         break;
       case 'i':
         flags->ignore_case = 1;
