@@ -16,38 +16,36 @@ int print_color_string(char *text, int size_text, regmatch_t match);
 int main(int argc, char *argv[]) {
   int size_patt = 250;
   char *pattern = calloc(sizeof(char), size_patt);//need check memory
-  //pattern[0] = '\0';
+
   regex_t regex;
   //int cflags = REG_EXTENDED;
   int cflags = 0;
   opterr = 0;
-  //errors error = GOOD_WORK;
+
   struct grep_flags flags;
   zeroing_flags(&flags);
   
-  parse_argv(argc, argv, &flags, &pattern, &size_patt);//if no file go exit
+  parse_argv(argc, argv, &flags, &pattern, &size_patt);
 
   if (flags.ignore_case == 1) cflags += REG_ICASE;
-  //print_error(error, pattern, 0);
-  if (flags.pattern == 0 && flags.pattern_from_file == 0) {
-      add_pattern(&pattern, &size_patt, argv[optind++]);//check?
-  }
-  //printf("%d %d %d %d %s\n", optind, argc, flags.pattern, flags.pattern_from_file, argv[optind]);
+  
+  if (flags.pattern == 0 && flags.pattern_from_file == 0)
+    add_pattern(&pattern, &size_patt, argv[optind++]);
+
   if (optind < argc) {
-    //.. no -e
-    
-    //printf("%s\n", pattern);
     if (regcomp(&regex, pattern, cflags) == 0) {
+      // //
       do {
         char *file_name = argv[optind];
         FILE *file;
         if ((file = fopen(file_name, "r")) == NULL) {
           print_error(NO_FILE, file_name, flags.no_messages_error);
         } else {
-          find_in_file(file, flags, regex, file_name);
+          find_in_file(file, flags, regex, file_name); // need rewrite
           fclose(file);
         }
       } while (++optind < argc);
+      // //
       regfree(&regex);
     }
     else
