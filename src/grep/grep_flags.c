@@ -8,7 +8,7 @@
 #include <stdio.h>
 
 int add_pattern(char **pattern, int *size_pattern, char *optarg) {
-    int size_opt = strlen(optarg);//safe?
+    int size_opt = strlen(optarg);
     int size_pat = strlen(*pattern);
     errors error = GOOD_WORK;
     if ((size_opt + size_pat + 2) >= *size_pattern) {
@@ -41,7 +41,7 @@ int add_file_pattern(char **pattern, int *size_pattern, char *optarg) {
                 error = get_string(file, &patt_in_file, &size_pif);
                 if (error  != WRONG_MEMORY)
                     if (add_pattern(pattern, size_pattern, patt_in_file) == WRONG_MEMORY)
-                      error = WRONG_MEMORY;//need checker
+                      error = WRONG_MEMORY;
             }
             free(patt_in_file);
         }
