@@ -6,7 +6,7 @@ void print_error(errors error, char* content, int no_message) {
         switch (error)
         {
         case NO_FILE:
-            fprintf(stderr, "s21_grep: %s: No such file or directory",
+            fprintf(stderr, "s21_grep: %s: No such file or directory\n",
                 content != NULL ? content : "");
             break;
         case NO_OPTION:
@@ -22,7 +22,7 @@ void print_error(errors error, char* content, int no_message) {
                 "...\n");
             break;
         case WRONG_PATTERN:
-            fprintf(stderr, "s21_grep: %s: Wrong regular pattern",
+            fprintf(stderr, "s21_grep: %s: Wrong regular pattern\n",
                 content != NULL ? content : "");
             break; 
         case WRONG_MEMORY:
