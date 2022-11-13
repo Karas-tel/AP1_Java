@@ -12,12 +12,13 @@ struct grep_flags {
   int no_messages_error;   // -s | --no-messages-error
   int only_matching;       // -o | --only-matching
   int pattern_from_file;   // -f [file] | <pattern-from-file>
-  int many_files;
+  int quantity_files;
 };
 
 void zeroing_flags(struct grep_flags *flags);
 int parse_argv(int argc, char *argv[],
                struct grep_flags *flags, char **pattern, int *size_patt);
-int add_pattern(char **pattern, int *size_pattern, char *optarg);               
+int add_pattern(char **pattern, int *size_pattern, char *optarg);
+int add_file_pattern(char **pattern, int *size_pattern, char *optarg);               
 
 #endif  // SRC_GREP_GREP_FLAGS_H_         
