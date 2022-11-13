@@ -13,14 +13,14 @@ int add_pattern(char **pattern, int *size_pattern, char *optarg) {
     errors error = GOOD_WORK;
     if ((size_opt + size_pat + 2) >= *size_pattern) {
         *size_pattern = size_opt * 1.5 + size_pat;
-        char *tmp = (char *)realloc(*pattern, *size_pattern);
+        char **tmp = (char **)realloc(*pattern, *size_pattern);
         if (tmp == NULL) error = WRONG_MEMORY;
-        else {
-            *pattern = tmp;
-            if ((*pattern)[0] != '\0' && optarg[0] != '\0')
-                strcat(*pattern, "|");
-            strcat(*pattern, optarg);
-        }
+        else pattern = tmp;
+    }
+    if (error == GOOD_WORK) {
+      if ((*pattern)[0] != '\0' && optarg[0] != '\0')
+        strcat(*pattern, "|");
+      strcat(*pattern, optarg);
     }
     return error;
 }
