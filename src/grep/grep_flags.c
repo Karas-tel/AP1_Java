@@ -33,11 +33,9 @@ int add_file_pattern(char **pattern, int *size_pattern, char *optarg) {
         error = NO_FILE;
     else {
         int size_pif = 256;
-        char *patt_in_file;
-        char *tmp = calloc(sizeof(char), size_pif);
-        if (tmp == NULL) error = WRONG_MEMORY;
+        char *patt_in_file = calloc(sizeof(char), size_pif);
+        if (patt_in_file == NULL) error = WRONG_MEMORY;
         else {
-            patt_in_file = tmp;
             while (error == GOOD_WORK) {
                 error = get_string(file, &patt_in_file, &size_pif);
                 if (error  != WRONG_MEMORY)
