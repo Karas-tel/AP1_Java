@@ -8,32 +8,40 @@
 #include <stdio.h>
 
 int add_pattern(char **pattern, int *size_pattern, char *optarg) {
+    
     int size_opt = strlen(optarg);
     int size_pat = strlen(*pattern);
     errors error = GOOD_WORK;
-    if ((size_opt + size_pat + 2) >= *size_pattern) {
-        *size_pattern = size_opt * 1.5 + size_pat;
-        char *tmp = (char *)realloc(*pattern, *size_pattern);
-        if (tmp == NULL) error = WRONG_MEMORY;
+    if ((size_opt + size_pat + 8) >= *size_pattern) {
+        *size_pattern = size_opt + size_pat * 1.5;
+        char *tmp = (char *)realloc(*pattern, *size_pattern * sizeof(char));
+        if (tmp == NULL) {
+          error = WRONG_MEMORY;
+          *size_pattern = size_pat;
+        }
         else *pattern = tmp;
     }
+    
     if (error == GOOD_WORK) {
       // if ((*pattern)[0] != '\0' && optarg[0] != '\0')
       if ((*pattern)[0] != '\0')
         strcat(*pattern, "\\|");
+      //printf("\none1: %d\n", *size_pattern);
       strcat(*pattern, optarg);
+      //printf("\none2: %d\n", *size_pattern);
     }
     return error;
 }
 
 int add_file_pattern(char **pattern, int *size_pattern, char *optarg) {
+  
     errors error = GOOD_WORK;
     FILE *file;
     if ((file = fopen(optarg, "r")) == NULL)
         error = NO_FILE;
     else {
         int size_pif = 256;
-        char *patt_in_file = calloc(sizeof(char), size_pif);
+        char *patt_in_file = calloc(size_pif, sizeof(char));
         if (patt_in_file == NULL) error = WRONG_MEMORY;
         else {
             while (error == GOOD_WORK) {
@@ -90,6 +98,7 @@ int parse_argv(int argc, char *argv[],
         break;
       case 'f':
         flags->pattern_from_file = 1;
+        //printf("\nim hear\n");
         error = add_file_pattern(pattern, size_patt, optarg);
         print_error(error, optarg, flags->no_messages_error);
         break;

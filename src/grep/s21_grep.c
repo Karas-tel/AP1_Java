@@ -17,8 +17,8 @@ int print_color_string(char *text, int size_text, regmatch_t match);
 void print_match(char *text, int size_text, regmatch_t match, struct grep_flags flags);
 
 int main(int argc, char *argv[]) {
-  int size_patt = 250;
-  char *pattern = calloc(sizeof(char), size_patt);//need check memory
+  int size_patt = 256;
+  char *pattern = calloc(size_patt, sizeof(char));//need check memory
 
   regex_t regex;
   //int cflags = REG_EXTENDED;
@@ -76,14 +76,16 @@ void find_files_with_match(FILE *file, struct grep_flags flags, regex_t regex,
   errors error = GOOD_WORK;
   //print_error(error, "in f_f_w_m", 0);
   int size_text = 256;
-  char *text = calloc(sizeof(char), size_text);// need check memory
+  char *text = calloc(size_text, sizeof(char));// need check memory
 
   //print_error(error, "in f_f_w_m", 0);
 
   int rez_regexec = 0;
   int exit = 0;
   do {
+    text[0] = '\0';
     error = get_string(file, &text, &size_text);
+    if (text[0] == '\0') {continue;}
     rez_regexec = regexec(&regex, text, 0, 0, 0);
     //print_error(error, text, 0);
     if (rez_regexec != REG_NOMATCH && flags.invert_match == 0) {
@@ -100,7 +102,7 @@ void find_files_with_match(FILE *file, struct grep_flags flags, regex_t regex,
 void find_in_file(FILE *file, struct grep_flags flags, regex_t regex,
                   char *file_name) {
   int size_text = 256;
-  char *text = calloc(sizeof(char), size_text);// need check memory
+  char *text = calloc(size_text, sizeof(char));// need check memory
   regmatch_t match;
   errors error = GOOD_WORK;
   int rez_regexec = 0;
