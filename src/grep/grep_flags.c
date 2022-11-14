@@ -21,20 +21,15 @@ int add_pattern(char **pattern, int *size_pattern, char *optarg) {
         }
         else *pattern = tmp;
     }
-    
     if (error == GOOD_WORK) {
-      // if ((*pattern)[0] != '\0' && optarg[0] != '\0')
       if ((*pattern)[0] != '\0')
         strcat(*pattern, "\\|");
-      //printf("\none1: %d\n", *size_pattern);
       strcat(*pattern, optarg);
-      //printf("\none2: %d\n", *size_pattern);
     }
     return error;
 }
 
 int add_file_pattern(char **pattern, int *size_pattern, char *optarg) {
-  
     errors error = GOOD_WORK;
     FILE *file;
     if ((file = fopen(optarg, "r")) == NULL)
@@ -63,7 +58,6 @@ int parse_argv(int argc, char *argv[],
   int flag_char = 0;
   (*pattern)[0] = '\0';
   const char *short_options = "e:ivclnhsof:";
-
   while ((flag_char = getopt(argc, argv, short_options)) != -1
         && error != WRONG_MEMORY) {
     switch (flag_char) {
@@ -98,7 +92,6 @@ int parse_argv(int argc, char *argv[],
         break;
       case 'f':
         flags->pattern_from_file = 1;
-        //printf("\nim hear\n");
         error = add_file_pattern(pattern, size_patt, optarg);
         print_error(error, optarg, flags->no_messages_error);
         break;
