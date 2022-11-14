@@ -102,7 +102,8 @@ void print_file(FILE *file, int number, int number_nonblank, int squeeze_blank,
   }
 
   if (number_nonblank == 1) {
-    if (0 < iter && text[0] != '\n') fprintf(stdout, "%6d\t", number_string++);// \t
+    if (0 < iter && text[0] != '\n')
+      fprintf(stdout, "%6d\t", number_string++);  // \t
   } else if (number == 1) {
     if (0 < iter) fprintf(stdout, "%6d\t", number_string++);
   }
@@ -124,14 +125,14 @@ void print_file(FILE *file, int number, int number_nonblank, int squeeze_blank,
         if ((int)c != 127) {
           c = (char)((int)c + 64);
         } else
-          c = '?';//create error ? -> !
+          c = '?';  // create error ? -> !
         flag_work_5 = 1;
       }
     }
 
     if (show_ends == 1) {
       if (c == '\n') {
-        fprintf(stdout, "$"); //$
+        fprintf(stdout, "$");  //$
         flag_work_5 = 0;
       }
     }

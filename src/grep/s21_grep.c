@@ -5,19 +5,20 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "print_error.h"
 #include "grep_flags.h"
+#include "print_error.h"
 #include "read_file.h"
 
 void find_files_with_match(FILE *file, struct grep_flags flags, regex_t regex,
-                  char *file_name);
+                           char *file_name);
 void find_in_file(FILE *file, struct grep_flags flags, regex_t regex,
                   char *file_name);
-void print_match(char *text, int size_text, regmatch_t match, struct grep_flags flags);
+void print_match(char *text, int size_text, regmatch_t match,
+                 struct grep_flags flags);
 
 int main(int argc, char *argv[]) {
   int size_patt = 256;
-  char *pattern = calloc(size_patt, sizeof(char));//need check memory
+  char *pattern = calloc(size_patt, sizeof(char));  // need check memory
 
   regex_t regex;
   int cflags = 0;
@@ -25,11 +26,11 @@ int main(int argc, char *argv[]) {
 
   struct grep_flags flags;
   zeroing_flags(&flags);
-  
+
   parse_argv(argc, argv, &flags, &pattern, &size_patt);
 
   if (flags.ignore_case == 1) cflags += REG_ICASE;
-  
+
   if (flags.pattern == 0 && flags.pattern_from_file == 0) {
     add_pattern(&pattern, &size_patt, argv[optind++]);
     flags.quantity_files--;
@@ -45,16 +46,14 @@ int main(int argc, char *argv[]) {
         } else {
           if (flags.files_with_matches == 1) {
             find_files_with_match(file, flags, regex, file_name);
-          }
-          else {
+          } else {
             find_in_file(file, flags, regex, file_name);
           }
           fclose(file);
         }
       } while (++optind < argc);
       regfree(&regex);
-    }
-    else
+    } else
       print_error(WRONG_PATTERN, pattern, 0);
   } else {
     print_error(NO_OPTION, NULL, 0);
@@ -64,18 +63,20 @@ int main(int argc, char *argv[]) {
 }
 
 void find_files_with_match(FILE *file, struct grep_flags flags, regex_t regex,
-                  char *file_name) {
+                           char *file_name) {
   errors error = GOOD_WORK;
   int size_text = 256;
 
-  char *text = calloc(size_text, sizeof(char));// need check memory
+  char *text = calloc(size_text, sizeof(char));  // need check memory
 
   int rez_regexec = 0;
   int exit = 0;
   do {
     text[0] = '\0';
     error = get_string(file, &text, &size_text);
-    if (text[0] == '\0') {continue;}
+    if (text[0] == '\0') {
+      continue;
+    }
     rez_regexec = regexec(&regex, text, 0, 0, 0);
     if (rez_regexec != REG_NOMATCH && flags.invert_match == 0) {
       printf("%s\n", file_name);
@@ -86,13 +87,13 @@ void find_files_with_match(FILE *file, struct grep_flags flags, regex_t regex,
       exit = 1;
     }
   } while (error == GOOD_WORK && error != WRONG_MEMORY && exit == 0);
-}                  
+}
 
 void find_in_file(FILE *file, struct grep_flags flags, regex_t regex,
                   char *file_name) {
   int size_text = 256;
 
-  char *text = calloc(size_text, sizeof(char));// need check memory
+  char *text = calloc(size_text, sizeof(char));  // need check memory
 
   regmatch_t match;
   errors error = GOOD_WORK;
@@ -103,16 +104,17 @@ void find_in_file(FILE *file, struct grep_flags flags, regex_t regex,
   do {
     counter_all++;
     text[0] = '\0';
-    error = get_string(file, &text, &size_text);//checker?
-    if (text[0] == '\0') {continue;}
+    error = get_string(file, &text, &size_text);  // checker?
+    if (text[0] == '\0') {
+      continue;
+    }
     rez_regexec = regexec(&regex, text, 1, &match, 0);
     if (rez_regexec != REG_NOMATCH && flags.invert_match == 0) {
       counter_match++;
       if (flags.count == 0) {
         if (flags.quantity_files > 1 && flags.no_filename == 0)
           printf("%s:", file_name);
-        if (flags.line_number == 1)
-          printf("%d:", counter_all);
+        if (flags.line_number == 1) printf("%d:", counter_all);
         print_match(text, size_text, match, flags);
       }
     }
@@ -121,35 +123,36 @@ void find_in_file(FILE *file, struct grep_flags flags, regex_t regex,
       if (flags.count == 0) {
         if (flags.quantity_files > 1 && flags.no_filename == 0)
           printf("%s:", file_name);
-        if (flags.line_number == 1)
-          printf("%d:", counter_all);
+        if (flags.line_number == 1) printf("%d:", counter_all);
         match.rm_eo = size_text;
         match.rm_so = 0;
         print_match(text, size_text, match, flags);
       }
     }
   } while (error == GOOD_WORK);
-  
+
   if (flags.count == 1) {
     if (flags.quantity_files > 1 && flags.no_filename == 0)
-          printf("%s:", file_name);
+      printf("%s:", file_name);
     printf("%d\n", counter_match);
   }
 
   free(text);
 }
 
-void print_match(char *text, int size_text, regmatch_t match, struct grep_flags flags) {
+void print_match(char *text, int size_text, regmatch_t match,
+                 struct grep_flags flags) {
   int i;
   for (i = 0; i < match.rm_so && flags.only_matching == 0; ++i) {
     printf("%c", text[i]);
   }
-  for (i = match.rm_so; text[i] != '\n' &&  i < match.rm_eo 
-      && text[i] != '\0'; ++i) {
+  for (i = match.rm_so; text[i] != '\n' && i < match.rm_eo && text[i] != '\0';
+       ++i) {
     printf("%c", text[i]);
   }
-  for (i = match.rm_eo; text[i] != '\n' && i < size_text 
-      && flags.only_matching == 0 && text[i] != '\0'; ++i) {
+  for (i = match.rm_eo; text[i] != '\n' && i < size_text &&
+                        flags.only_matching == 0 && text[i] != '\0';
+       ++i) {
     printf("%c", text[i]);
   }
   printf("\n");
