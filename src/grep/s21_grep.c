@@ -17,6 +17,8 @@ void print_match(char *text, int size_text, regmatch_t match,
                  struct grep_flags flags);
 
 int main(int argc, char *argv[]) {
+  errors error = GOOD_WORK;
+
   int size_patt = 256;
   char *pattern = calloc(size_patt, sizeof(char));  // need check memory
 
@@ -27,16 +29,18 @@ int main(int argc, char *argv[]) {
   struct grep_flags flags;
   zeroing_flags(&flags);
 
-  parse_argv(argc, argv, &flags, &pattern, &size_patt);
+  error = parse_argv(argc, argv, &flags, &pattern, &size_patt);
 
   if (flags.ignore_case == 1) cflags += REG_ICASE;
 
-  if (flags.pattern == 0 && flags.pattern_from_file == 0) {
+  if (flags.pattern == 0 && flags.pattern_from_file == 0
+     && (error != ILLEGAL_OPTION && error != NO_OPTION)) {
     add_pattern(&pattern, &size_patt, argv[optind++]);
     flags.quantity_files--;
   }
 
-  if (optind < argc) {
+  if (optind < argc
+    && (error != ILLEGAL_OPTION || error != NO_OPTION)) {
     if (regcomp(&regex, pattern, cflags) == 0) {
       do {
         char *file_name = argv[optind];
@@ -143,17 +147,15 @@ void find_in_file(FILE *file, struct grep_flags flags, regex_t regex,
 void print_match(char *text, int size_text, regmatch_t match,
                  struct grep_flags flags) {
   int i;
-  for (i = 0; i < match.rm_so && flags.only_matching == 0; ++i) {
-    printf("%c", text[i]);
+  for (i = 0; i < match.rm_so && flags.only_matching == 0;) {
+    printf("%c", text[i++]);
   }
-  for (i = match.rm_so; text[i] != '\n' && i < match.rm_eo && text[i] != '\0';
-       ++i) {
-    printf("%c", text[i]);
+  for (i = match.rm_so; i < match.rm_eo && text[i] != '\n' && text[i] != '\0';) {
+    printf("%c", text[i++]);
   }
-  for (i = match.rm_eo; text[i] != '\n' && i < size_text &&
-                        flags.only_matching == 0 && text[i] != '\0';
-       ++i) {
-    printf("%c", text[i]);
+  for (i = match.rm_eo; flags.only_matching == 0 && i < size_text &&
+            text[i] != '\n' && text[i] != '\0';) {
+    printf("%c", text[i++]);
   }
   printf("\n");
 }
