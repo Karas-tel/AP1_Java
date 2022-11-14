@@ -12,7 +12,7 @@ struct grep_flags {
   int no_messages_error;   // -s | --no-messages-error
   int only_matching;       // -o | --only-matching
   int pattern_from_file;   // -f [file] | <pattern-from-file>
-  int quantity_files;
+  int quantity_files;      // counter files
 };
 
 void zeroing_flags(struct grep_flags *flags);
