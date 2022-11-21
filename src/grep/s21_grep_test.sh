@@ -7,6 +7,7 @@ DIFF=""
 
 declare -a tests=(
 "-e return FLAGS FILES"
+"-e '^#inc' FLAGS FILES"
 #"for s21_grep.c s21_grep.h Makefile VAR"
 #"for s21_grep.c VAR"
 #"-e for -e ^int s21_grep.c s21_grep.h Makefile VAR"
@@ -52,7 +53,7 @@ declare -a extra=(
 
 testing()
 {
-    t=$(echo $@ | sed "s/FLAGS/$flags/g;s/FILES/$files/g")
+    t=$(echo $@ | sed "s/FLAGS/$flags/g;s/FILES/$files_s/g")
     echo $t
     ./s21_grep $t > s21_grep_test.log
     grep $t > grep_test.log
@@ -77,27 +78,35 @@ testing()
 #     var="-"
 #     testing $i
 # done
+echo ${files[1]}
 getfiles()
 {
-    for file1 in "${files[@]}"
+    for file1 in {0..3} #"${files[@]}"
     do
-        for file2 in "${files[@]}"
+        # if [ $file1 == $file2 ] 
+        # then continue 
+        # fi
+        for file2 in {0..4} #"${files[@]}"
         do
-        #     for file3 in "${files[@]}"
-        #     do
-        #         for file4 in "${files[@]}"
-        #         do
+            
+            for file3 in {0..4}  #"${files[@]}"
+            do
+                
+                for file4 in {0..4} #"${files[@]}"
+                do
                     
-                    if [ "$file1" != "$file2" ] #&& [ "$file2" != "$file3" ] && [ "$file1" != "$file3" ] 
-                    # && \
-                    #    [ $file4 != $file1 ] && [ $file4 != $file2 ] && [ $file4 != $file3 ]
+                    #if [ ${files[file1]} != ${files[file2]} ]
+                    if [ "$file1" != "$file2" ] && [ "$file2" != "$file3" ] && [ "$file1" != "$file3" ] && \
+                    [ $file4 != $file1 ] && [ $file4 != $file2 ] && [ $file4 != $file3 ]
                     then
-                        files="$file1 $file2"
+                        #echo $file1
+                        #echo ${files[$file1]}
+                        files_s="${files[file1]} ${files[file2]} ${files[file3]} ${files[file4]}"
                         testing $i
                     fi
                     
-        #         done
-        #     done
+                done
+            done
         done
     done
 }
