@@ -29,8 +29,7 @@ int get_string(FILE *file, char **string, int *size_string) {
 
   (*string)[iter] = '\n';
 
-  if (error == END_FILE && iter == 0) (*string)[iter] = '\0';
-
+  if (error == END_FILE) (*string)[iter] = '\0';
   (*string)[++iter] = '\0';
 
   return error;

@@ -20,5 +20,6 @@ int parse_argv(int argc, char *argv[], struct grep_flags *flags, char **pattern,
                int *size_patt);
 int add_pattern(char **pattern, int *size_pattern, char *optarg);
 int add_file_pattern(char **pattern, int *size_pattern, char *optarg);
+int remove_n(char *pattern);
 
 #endif  // SRC_GREP_GREP_FLAGS_H_

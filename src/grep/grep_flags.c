@@ -22,7 +22,7 @@ int add_pattern(char **pattern, int *size_pattern, char *optarg) {
       *pattern = tmp;
   }
   if (error == GOOD_WORK) {
-    if ((*pattern)[0] != '\0') strcat(*pattern, "\\|");
+    if ((*pattern)[0] != '\0' && (optarg[0] != '\0')) strcat(*pattern, "\\|");
     strcat(*pattern, optarg);
   }
   return error;
@@ -41,9 +41,11 @@ int add_file_pattern(char **pattern, int *size_pattern, char *optarg) {
     else {
       while (error == GOOD_WORK) {
         error = get_string(file, &patt_in_file, &size_pif);
-        if (error != WRONG_MEMORY)
+        if (error != WRONG_MEMORY) {
+          remove_n(*pattern);
           if (add_pattern(pattern, size_pattern, patt_in_file) == WRONG_MEMORY)
             error = WRONG_MEMORY;
+        }
       }
       free(patt_in_file);
     }
@@ -122,4 +124,11 @@ void zeroing_flags(struct grep_flags *flags) {
   flags->only_matching = 0;
   flags->pattern_from_file = 0;
   flags->quantity_files = 0;
+}
+
+int remove_n(char *pattern) {
+  if (pattern[0] != '\0')
+    for (int i = 1; pattern[i] != '\0'; ++i)
+      if (pattern[i] == '\n') pattern[i] = '\0';
+  return 0;
 }
