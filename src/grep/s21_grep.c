@@ -62,6 +62,7 @@ int main(int argc, char *argv[]) {
   } else {
     print_error(NO_OPTION, NULL, 0);
   }
+  
   free(pattern);
   return 0;
 }
@@ -90,6 +91,7 @@ int find_files_with_match(FILE *file, struct grep_flags flags, regex_t regex) {
       exit = 1;
     }
   } while (error == GOOD_WORK && error != WRONG_MEMORY && exit == 0);
+  free(text);
   return exit;
 }
 
