@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
   } else {
     print_error(NO_OPTION, NULL, 0);
   }
-  
+
   free(pattern);
   return 0;
 }
