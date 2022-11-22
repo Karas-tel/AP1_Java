@@ -22,9 +22,10 @@ int add_pattern(char **pattern, int *size_pattern, char *optarg) {
       *pattern = tmp;
   }
   if (error == GOOD_WORK) {
-    if ((*pattern)[0] != '\0' && (optarg[0] != '\0')) strcat(*pattern, "\\|");
+    if ((*pattern)[0] != '\0' && (optarg[0] != '\0')) strcat(*pattern, "|");
     strcat(*pattern, optarg);
   }
+
   return error;
 }
 

@@ -23,10 +23,8 @@ clean:
 	rm -f *.o
 
 check:
-	#cp ../materials/linters/CPPLINT.cfg ./
-	#python3 ../materials/linters/cpplint.py --extensions=c *.c
-	#python3 ../materials/linters/cpplint.py --extensions=h *.h
-	#cppcheck --enable=all --suppress=missingIncludeSystem *.c
+	make s21_grep
+	bash s21_grep_test.sh
 
 git:
 	make clean
