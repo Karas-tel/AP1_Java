@@ -30,6 +30,7 @@ git:
 	make clean
 	git add *.c
 	git add *.h
+	git add *.sh
 	git add Makefile
 	git commit -m "develop_C3"
 	git push origin develop
