@@ -15,10 +15,8 @@ clean:
 	rm -f *.o
 
 check:
-	#cp ../materials/linters/CPPLINT.cfg ./
-	#python3 ../materials/linters/cpplint.py --extensions=c *.c
-	#python3 ../materials/linters/cpplint.py --extensions=h *.h
-	#cppcheck --enable=all --suppress=missingIncludeSystem *.c
+	make s21_cat
+	bash ./s21_cat_test.sh
 
 git:
 	make clean
